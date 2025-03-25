@@ -90,7 +90,7 @@ EOF
       }
 
       config {
-        image = "{{ DOCKER_REGISTRY_NAME }}/traefik:2.10"
+        image = "{{ DOCKER_REGISTRY_NAME }}/traefik:latest"
         image_pull_timeout = "15m"
         ports = ["admin", "http", "https"]
         args = [

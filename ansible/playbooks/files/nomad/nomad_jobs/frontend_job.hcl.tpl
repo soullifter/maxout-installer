@@ -34,7 +34,7 @@ job "maxout-frontend" {
       driver = "docker"
 
       env {
-        VITE_API_URL                            = "{{ PUBLIC_SERVER_URL }}/api"
+        VITE_API_URL                            = "{{ PUBLIC_SERVER_URL }}"
         WDS_SOCKET_PORT                         = 0
       }
 

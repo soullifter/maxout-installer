@@ -18,7 +18,7 @@ external_maxout_db_uri: ""
 cluster_endpoint: "34.203.234.75"
 
 docker_registry_name: 'maxout.azurecr.io'
-docker_registry_password: ''
+docker_registry_password: 'ZbaB++H6GCIH6Xg93MVSiRCRD7MKAbiDvUop7l+BaI+ACRB84JAw'
 docker_registry_username: 'maxout-pull-test'
 image_branch: 'test'
 
