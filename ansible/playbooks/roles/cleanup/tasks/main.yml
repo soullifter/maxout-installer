@@ -17,6 +17,6 @@
 - name: Cleanup Consul
   ansible.builtin.import_tasks: cleanup_consul.yml
 
-- name: Cleanup Nomad and PRISM Folders
-  ansible.builtin.import_tasks: cleanup_nomad_prism.yml
+- name: Cleanup Nomad and Maxout Folders
+  ansible.builtin.import_tasks: cleanup_nomad_maxout.yml
   become: true

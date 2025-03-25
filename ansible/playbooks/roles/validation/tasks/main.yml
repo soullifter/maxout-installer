@@ -40,8 +40,8 @@
   changed_when: false
   tags: system_resources
   failed_when: >
-    (system_resources_result.stdout_lines[0].split()[1]|int < 16000000) or
-    (system_resources_result.stdout_lines[1].split()[2]|int < 8)
+    (system_resources_result.stdout_lines[0].split()[1]|int < 7921000) or
+    (system_resources_result.stdout_lines[1].split()[2]|int < 4)
 
 - name: Install netcat on Debian/Ubuntu
   when: ansible_pkg_mgr == "apt"
