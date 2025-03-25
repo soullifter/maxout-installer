@@ -1,0 +1,67 @@
+# config.yml
+
+openai_api_key: "" # Replace with your OpenAI API key, keep it as empty string, if you don't need OpenAI summarization.
+
+# Version of Maxout to deploy (only used if Docker images are not provided)
+maxout_version: "latest" # Typically "latest" or a specific version string.
+
+jwt_secret: "visionflow"
+
+sendgrid_api_key: "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"
+
+# Whether to use a self-hosted SQL server
+self_hosted_sql_server: true # Set to true if using a self-hosted SQL server, false if using an external one.
+
+# if self_hosted_sql_server is false make sure to pass the following URIs. Ensure that each database is accessible from each machines.
+external_maxout_db_uri: ""
+
+cluster_endpoint: "34.203.234.75"
+
+docker_registry_name: 'maxout.azurecr.io'
+docker_registry_password: 'ZbaB++H6GCIH6Xg93MVSiRCRD7MKAbiDvUop7l+BaI+ACRB84JAw'
+docker_registry_username: 'maxout-pull-test'
+image_branch: 'test'
+
+nodes:
+  - name: "node1" # Replace with a unique name for the node.
+    private_ip: "172.31.19.50" # Replace with the private IP address of the node.
+    ssh_username: "ubuntu" # Replace with the SSH username for the node (typically "ubuntu" for AWS Ubuntu, "ec2-user" for AWS Amazon Linux).
+
+    connection_type:
+      "ssh" # Defaults to "ssh", meaning Ansible will connect to this node using an SSH client.
+      # You can set this to "local" if the node is the local machine where Ansible is running,
+      # in which case Ansible will install all libraries directly on the local host without using SSH.
+
+    private_key:
+      "/Users/yashwanthadunukota/Downloads/yash_aws.pem" # Path to the SSH private key for this node.
+      # Leave as "" if you have direct SSH access from the host or the host is already trusted.
+
+    ssh_common_args:
+      "" # Optional: If no private key is used, specify additional SSH options here.
+      # Leave this empty ("") if you use `private_key` or direct SSH access.
+
+    roles:
+      critical_services: 
+        run_jobs: True # Set to true if this node should run critical services such as the Nomad Server, Consul Server, etc.
+      sql_server:
+        database_dir: "/opt/maxout/database" # Replace with the directory where the SQL server should store its database files.
+        database_password: "password" # Replace with a strong, secure password for production environments without any special character.
+
+  # - name: "node2" # Another node in the cluster.
+  #   private_ip: "172.31.9.89" # Private IP of this node.
+  #   ssh_username: "ubuntu" # Replace with the SSH username for the node (typically "ubuntu" for AWS Ubuntu, "ec2-user" for AWS Amazon Linux).
+
+  #   connection_type:
+  #     "ssh" # Defaults to "ssh", meaning Ansible will connect to this node using an SSH client.
+  #     # You can set this to "local" if the node is the local machine where Ansible is running,
+  #     # in which case Ansible will install all libraries directly on the local host without using SSH.
+
+  #   private_key:
+  #     "" # Leave this empty if there's no private key and you're using `ssh_common_args`.
+  #     # If a private key is available, set the path here.
+
+  #   ssh_common_args:
+  #     "" # Optional: If no private key is used, specify additional SSH options here.
+  #     # Leave this empty ("") if you use `private_key` or direct SSH access.
+
+  #   roles: {} # This node does not have specific roles assigned (can be updated).

@@ -1,0 +1,22 @@
+---
+- name: Cleanup Nomad Jobs
+  ansible.builtin.import_tasks: cleanup_nomad_jobs.yml
+
+- name: Cleanup Certs Folder
+  ansible.builtin.import_tasks: cleanup_certs.yml
+
+- name: Cleanup Postgresql Folder
+  ansible.builtin.import_tasks: cleanup_postgresql.yml
+
+- name: Cleanup Docker Images
+  ansible.builtin.import_tasks: cleanup_docker_images.yml
+
+- name: Cleanup Nomad
+  ansible.builtin.import_tasks: cleanup_nomad.yml
+
+- name: Cleanup Consul
+  ansible.builtin.import_tasks: cleanup_consul.yml
+
+- name: Cleanup Nomad and PRISM Folders
+  ansible.builtin.import_tasks: cleanup_nomad_prism.yml
+  become: true

@@ -1,0 +1,34 @@
+---
+- name: Override the maxout_version if docker_images folder exists
+  ansible.builtin.set_fact:
+    maxout_version: "{{ cluster_config.maxout_version }}"
+
+- name: Print the value of maxout_version
+  ansible.builtin.debug:
+    msg: "The value of maxout_version is: {{ cluster_config.maxout_version }}"
+
+- name: setup the server facts
+  ansible.builtin.include_tasks: setup_server_facts.yml
+  vars:
+    nodes: "{{ cluster_config.nodes | selectattr('roles', 'defined') | list }}"
+
+- name: setup the client facts
+  ansible.builtin.include_tasks: setup_client_facts.yml
+  vars:
+    nodes: "{{ cluster_config.nodes }}"
+
+- name: Save all the Private IPs in the cluster
+  ansible.builtin.set_fact:
+    machine_private_ips: "{{ cluster_config.nodes | map(attribute='private_ip') | list }}"
+
+- name: Debug to see all set variables
+  ansible.builtin.debug:
+    msg:
+      - "critical_services_nodes: {{ critical_services_nodes }}"
+      - "critical_services_ips: {{ critical_services_ips }}"
+      - "sql_server: {{ sql_server | default([]) }}"
+      - "sql_clients: {{ sql_clients | default([]) }}"
+      - "machine_private_ips: {{ machine_private_ips }}" 
+      - "current_node_info: {{ current_node_info }}"
+  run_once: true
+  delegate_to: "{{ groups['all'] | last }}"

@@ -1,0 +1,33 @@
+---
+- name: Define list of image repository names to delete
+  ansible.builtin.set_fact:
+    images_to_delete:
+      - "maxout.azurecr.io/{{ 'maxout_backend' if image_branch == 'prod' else 'maxout_backend_' ~ image_branch }}"
+      - "maxout.azurecr.io/{{ 'maxout_frontend' if image_branch == 'prod' else 'maxout_frontend_' ~ image_branch }}"
+      - "maxout.azurecr.io/traefik"
+
+# since nomad is stopped, there shouldn't be any running container
+
+- name: Find and delete containers using images
+  ansible.builtin.shell: |
+    docker ps --filter "ancestor={{ item }}" --format '{{ "{{.ID}}" }}' | xargs -r docker rm -f
+  loop: "{{ images_to_delete }}"
+  changed_when: true
+  ignore_errors: true
+
+- name: Remove Docker images by repository name
+  ansible.builtin.shell: |
+    docker images --format '{{ "{{.Repository}}:{{.Tag}}" }} {{ "{{.ID}}" }}' | grep -E '^{{ item }}:' | awk '{print $2}' | xargs -r docker rmi -f
+  loop: "{{ images_to_delete }}"
+  changed_when: true
+  ignore_errors: true
+
+- name: Verify deletion of images
+  ansible.builtin.command:
+    cmd: "docker images -q {{ item }}"
+  loop: "{{ images_to_delete }}"
+  register: verify_deletion
+  retries: 3
+  delay: 5
+  until: verify_deletion.stdout == ''
+  ignore_errors: true

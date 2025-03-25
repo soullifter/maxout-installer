@@ -1,0 +1,71 @@
+---
+- name: Retrieve the Nomad ACL token
+  when: ansible_host_private_ip == critical_services_ips[0]
+  block:
+    - name: Retrieve the Nomad ACL token
+      ansible.builtin.shell: |
+        set -o pipefail
+        grep 'Secret ID' "/opt/maxout/nomad_data/task_runner_token.txt" | awk '{print $NF}'
+      register: acl_token
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Fail if ACL token retrieval failed
+      ansible.builtin.fail:
+        msg: "Failed to retrieve Nomad ACL token on {{ ansible_host }}. Error: {{ acl_token }}"
+      when: acl_token is failed
+
+  rescue:
+    - name: Fail playbook with error
+      ansible.builtin.fail:
+        msg: "Retrieving Nomad ACL token failed on {{ ansible_host }}."
+
+- name: Calculate the majority count without using 'ceil'
+  set_fact:
+    majority_server_nodes: "{{ (( critical_services_ips | length  + 1) // 2) }}"
+
+- name: Determine nomad-fact for the host
+  block:
+    - name: Determine node pool and class
+      ansible.builtin.set_fact:
+        node_pool: >-
+          {% if current_node_info.is_critical_services_node and not current_node_info.should_run_jobs %}critical_services{% else %}default{% endif %}
+        node_class: "{{ 'critical_services' if current_node_info.is_critical_services_node else 'default' }}"
+
+    - name: Fail if setting node pool and class failed
+      ansible.builtin.fail:
+        msg: "Failed to determine node pool and class on {{ ansible_host }}."
+      when: node_pool is not defined or node_class is not defined
+
+  rescue:
+    - name: Fail playbook with error
+      ansible.builtin.fail:
+        msg: "Determining node pool and class failed on {{ ansible_host }}."
+
+- name: Gather and set common variables on host
+  block:
+    - name: Set common variables
+      ansible.builtin.set_fact:
+        PRIVATE_SERVER_IP: "{{ critical_services_ips[0] }}"
+        NODE_POOL: "{{ node_pool }}"
+        PUBLIC_SERVER_IP: "{{ cluster_config.cluster_endpoint }}"
+        DOCKER_REGISTRY_NAME: "{{ cluster_config.docker_registry_name }}"
+        DOCKER_REGISTRY_USERNAME: "{{ cluster_config.docker_registry_username }}"
+        DOCKER_REGISTRY_PASSWORD: "{{ cluster_config.docker_registry_password }}"
+        MAXOUT_VERSION: "{{ maxout_version }}"
+        IMAGE_BRANCH: "{{ image_branch }}"
+        NUM_CRITICAL_SERVICES_NODES: "{{ critical_services_ips | length }}"
+        PUBLIC_SERVER_URL: "{{ 'https://' + cluster_config.cluster_endpoint }}"
+
+      register: result
+
+    - name: Fail if setting common variables failed
+      ansible.builtin.fail:
+        msg: "Failed to set common variables on localhost. Error: {{ result }}"
+      when: result is failed
+
+  rescue:
+    - name: Fail playbook with error
+      ansible.builtin.fail:
+        msg: "Setting common variables failed on localhost."

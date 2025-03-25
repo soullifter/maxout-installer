@@ -1,0 +1,117 @@
+---
+- name: Submit Nomad jobs
+  when: ansible_host_private_ip == critical_services_ips[0]
+  block:
+    - name: Slurp HCL files from Nomad server
+      block:
+        - name: Slurp HCL files (Traefik, Backend, Autoscaler, Keycloak)
+          ansible.builtin.slurp:
+            src: "{{ item }}"
+          loop:
+            - "/tmp/traefik_job.hcl"
+            - "/tmp/backend_job.hcl"
+            - "/tmp/frontend_job.hcl"
+          register: slurped_files
+
+      rescue:
+        - name: Fail playbook with error (slurp step)
+          ansible.builtin.fail:
+            msg: "Slurping HCL files failed on {{ ansible_host }}."
+
+    - name: Debug JSON to be sent to Nomad
+      ansible.builtin.debug:
+        msg: "{{ {'JobHCL': item.content | b64decode, 'Canonicalize': true} | to_json }}"
+      loop: "{{ slurped_files.results }}"
+
+    - name: Parse Nomad job HCL to JSON
+      block:
+        - name: Parse Nomad job HCL
+          ansible.builtin.uri:
+            url: "http://localhost:4646/v1/jobs/parse"
+            method: POST
+            headers:
+              Content-Type: "application/json"
+              X-Nomad-Token: "{{ acl_token.stdout }}"
+            body: "{{ {'JobHCL': item.content | b64decode, 'Canonicalize': true} | to_json }}"
+            body_format: json
+            return_content: true
+          loop: "{{ slurped_files.results }}"
+          register: parsed_jobs
+
+        - name: Fail if parsing Nomad job HCL failed
+          ansible.builtin.fail:
+            msg: "Failed to parse Nomad job HCL on {{ ansible_host }}. Error: {{ parsed_jobs }}"
+          when: parsed_jobs is failed
+
+      rescue:
+        - name: Fail playbook with error (parse step)
+          ansible.builtin.fail:
+            msg: "Parsing Nomad job HCL failed on {{ ansible_host }}."
+
+    - name: Submit parsed Nomad jobs to server
+      block:
+        - name: Submit Traefik Nomad job
+          ansible.builtin.uri:
+            url: "http://localhost:4646/v1/jobs"
+            method: POST
+            headers:
+              Content-Type: "application/json"
+              X-Nomad-Token: "{{ acl_token.stdout }}"
+            body: "{{ {'Job': item.json} | to_nice_json }}"
+            body_format: json
+            return_content: true
+          loop: "{{ parsed_jobs.results }}"
+          when: item.json is defined and item.json.Name == 'traefik'
+          register: traefik_submission_response
+
+        - name: Fail if submitting Traefik job failed
+          ansible.builtin.fail:
+            msg: "Failed to submit Traefik job on {{ ansible_host }}. Error: {{ traefik_submission_response }}"
+          when: traefik_submission_response is failed
+
+        - name: Submit remaining Nomad jobs
+          ansible.builtin.uri:
+            url: "http://localhost:4646/v1/jobs"
+            method: POST
+            headers:
+              Content-Type: "application/json"
+              X-Nomad-Token: "{{ acl_token.stdout }}"
+            body: "{{ {'Job': item.json} | to_nice_json }}"
+            body_format: json
+            return_content: true
+          loop: "{{ parsed_jobs.results }}"
+          when: item.json is defined and item.json.Name not in ['traefik','keycloak']
+          register: job_submission_responses
+
+        - name: Fail if submitting remaining Nomad jobs failed
+          ansible.builtin.fail:
+            msg: "Failed to submit a Nomad job on {{ ansible_host }}. Error: {{ job_submission_responses }}"
+          when: job_submission_responses is failed
+
+      rescue:
+        - name: Fail playbook with error (Nomad submission block)
+          ansible.builtin.fail:
+            msg: "Submitting Nomad jobs failed on {{ ansible_host }}."
+
+
+    - name: Cleanup temporary HCL files
+      block:
+        - name: Remove the HCL files in /tmp
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - "/tmp/traefik_job.hcl"
+            - "/tmp/backend_job.hcl"
+            - "/tmp/frontend_job.hcl"
+          register: cleanup_result
+
+        - name: Fail if cleaning up HCL files failed
+          ansible.builtin.fail:
+            msg: "Failed to cleanup temporary HCL files on {{ ansible_host }}. Error: {{ cleanup_result }}"
+          when: cleanup_result is failed
+
+      rescue:
+        - name: Fail playbook with error (cleanup step)
+          ansible.builtin.fail:
+            msg: "Cleanup of temporary HCL files failed on {{ ansible_host }}."
