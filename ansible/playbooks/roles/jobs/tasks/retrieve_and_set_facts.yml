@@ -55,6 +55,12 @@
         DOCKER_REGISTRY_PASSWORD: "{{ cluster_config.docker_registry_password }}"
         MAXOUT_VERSION: "{{ maxout_version }}"
         IMAGE_BRANCH: "{{ image_branch }}"
+        ADMIN_PASSWORD: "{{ cluster_config.admin_password }}"
+        ADMIN_MAIL: "{{ cluster_config.admin_mail }}"
+        ADMIN_NAME: "{{ cluster_config.admin_name }}"
+        ADMIN_NUMBER: "{{ cluster_config.admin_number }}"
+        ADMIN_IRID: "{{ cluster_config.admin_irid }}"
+        NUM_USERS: "{{ cluster_config.num_users }}"
         NUM_CRITICAL_SERVICES_NODES: "{{ critical_services_ips | length }}"
         PUBLIC_SERVER_URL: "{{ 'https://' + cluster_config.cluster_endpoint }}"
 

@@ -66,6 +66,12 @@ EOF
 
       env {
         PUBLIC_URL                    = "{{ PUBLIC_SERVER_URL }}"
+        ADMIN_PASSWORD                = "{{ ADMIN_PASSWORD }}"
+        ADMIN_MAIL                    = "{{ ADMIN_MAIL }}"
+        ADMIN_NAME                    = "{{ ADMIN_NAME }}"
+        ADMIN_NUMBER                  = "{{ ADMIN_NUMBER }}"
+        ADMIN_IRID                    = "{{ ADMIN_IRID }}"
+        NUM_USERS                     = "{{ NUM_USERS }}"
       }
 
       config {

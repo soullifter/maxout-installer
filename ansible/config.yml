@@ -9,18 +9,25 @@ jwt_secret: "visionflow"
 
 sendgrid_api_key: ""
 
+admin_password: "password"
+admin_name: "Yash"
+admin_mail: "yashulakshya310@gmail.com"
+admin_irid: "IM969349"
+admin_number: "+18326519925"
+num_users: 5
+
 # Whether to use a self-hosted SQL server
 self_hosted_sql_server: true # Set to true if using a self-hosted SQL server, false if using an external one.
 
 # if self_hosted_sql_server is false make sure to pass the following URIs. Ensure that each database is accessible from each machines.
 external_maxout_db_uri: ""
 
-cluster_endpoint: "34.203.234.75"
+cluster_endpoint: "100.28.227.248"
 
 docker_registry_name: 'maxout.azurecr.io'
-docker_registry_password: 'ZbaB++H6GCIH6Xg93MVSiRCRD7MKAbiDvUop7l+BaI+ACRB84JAw'
-docker_registry_username: 'maxout-pull-test'
-image_branch: 'test'
+docker_registry_password: ''
+docker_registry_username: 'maxout-pull-maxout-beta'
+image_branch: 'maxout-beta'
 
 nodes:
   - name: "node1" # Replace with a unique name for the node.
