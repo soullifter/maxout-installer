@@ -57,6 +57,7 @@ job "maxout-backend" {
 {{- with nomadVar "nomad/jobs" -}}
 DB_URI = {{ .db_uri }}
 OPENAI_API_KEY = {{ .openai_api_key }}
+GEMINI_API_KEY = {{ .gemini_api_key }}
 JWT_SECRET = {{ .jwt_secret }}
 SENDGRID_API_KEY = {{ .sendgrid_api_key }}
 {{- end -}}

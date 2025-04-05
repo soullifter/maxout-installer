@@ -8,7 +8,6 @@
     - cluster_config.self_hosted_sql_server
     - cluster_config.nodes
     - cluster_config.cluster_endpoint
-    - cluster_config.openai_api_key
     - cluster_config.jwt_secret
     - cluster_config.sendgrid_api_key
 #TODO (Anyone): Modify this to access common attributes without `cluster_config.` prefix

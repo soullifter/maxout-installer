@@ -1,6 +1,7 @@
 # config.yml
 
 openai_api_key: "" # Replace with your OpenAI API key, keep it as empty string, if you don't need OpenAI summarization.
+gemini_api_key: "" # Replace with your Gemini API key, keep it as empty string, if you don't need Gemini summarization.
 
 # Version of Maxout to deploy (only used if Docker images are not provided)
 maxout_version: "latest" # Typically "latest" or a specific version string.
